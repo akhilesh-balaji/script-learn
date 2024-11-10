@@ -7,9 +7,11 @@ end
 
 function set_script(script)
     global CURRENT_SCRIPT = script
+    include("langs/$(current_script())/data.jl")
 end
 
 include("langs/$(current_script())/data.jl")
+
 function transliterate(tamil)
     english = ""
     for char_i_ ∈ 1:length(tamil)
