@@ -1,6 +1,7 @@
 using Mousetrap
 using TickTock
 
+# TODO: Export these to separate language file
 consonants = Dict(
     "க" => "ka",
     "ங" => "~Nga",
@@ -19,7 +20,7 @@ consonants = Dict(
     "ழ" => "zha",
     "ள" => "La",
     "ற" => "Ra",
-    "ன" => "^na",
+    "ன" => "na",  # ^na
 
     "ஜ" => "ja",
     "ஶ" => "Sa",
@@ -129,7 +130,7 @@ function random_word_from_src()
         words = split(randline, " ")
         chosen_word = rand(words)
     end
-    return string(replace(chosen_word, "," => "", "." => "", "?" => "" " " => ""))
+    return string(replace(chosen_word, "," => "", "." => "", "?" => "", " " => ""))
 end
 
 
@@ -142,7 +143,7 @@ const WIDGET_COLOR_WARNING = "warning"
 const WIDGET_COLOR_ERROR = "error"
 
 # create CSS classes for all of the widget colors
-for name in [WIDGET_COLOR_DEFAULT, WIDGET_COLOR_ACCENT, WIDGET_COLOR_SUCCESS, WIDGET_COLOR_WARNING, WIDGET_COLOR_ERROR]
+for name ∈ [WIDGET_COLOR_DEFAULT, WIDGET_COLOR_ACCENT, WIDGET_COLOR_SUCCESS, WIDGET_COLOR_WARNING, WIDGET_COLOR_ERROR]
     # compile CSS and append it to the global CSS style provider state
     add_css!("""
     $name:not(.opaque) {
@@ -157,10 +158,10 @@ end
 
 # function to set the accent color of a widget
 function set_accent_color!(widget::Widget, color, opaque = true)
-    if !(color in [WIDGET_COLOR_DEFAULT, WIDGET_COLOR_ACCENT, WIDGET_COLOR_SUCCESS, WIDGET_COLOR_WARNING, WIDGET_COLOR_ERROR])
+    if !(color ∈ [WIDGET_COLOR_DEFAULT, WIDGET_COLOR_ACCENT, WIDGET_COLOR_SUCCESS, WIDGET_COLOR_WARNING, WIDGET_COLOR_ERROR])
         log_critical("In set_color!: Color ID `" * color * "` is not supported")
     end
-    for color_type in [WIDGET_COLOR_DEFAULT, WIDGET_COLOR_ACCENT, WIDGET_COLOR_SUCCESS, WIDGET_COLOR_WARNING, WIDGET_COLOR_ERROR]
+    for color_type ∈ [WIDGET_COLOR_DEFAULT, WIDGET_COLOR_ACCENT, WIDGET_COLOR_SUCCESS, WIDGET_COLOR_WARNING, WIDGET_COLOR_ERROR]
         remove_css_class!(widget, color_type)
     end
     add_css_class!(widget, color)
@@ -203,15 +204,18 @@ main() do app::Application
 
     points = 0
     counter = 1
-    point_label = Label("$counter | $(string(round(points, sigdigits=2)))")
+    num_words_for_round = 2
+
+    point_label = Label("$counter/$num_words_for_round | $(string(round(points, sigdigits=2)))")  # TODO: Add score record system
     add_css_class!(point_label, "mono")
     tick()
 
     function submit_transliteration()
-        num_words_for_round = 10
+        println(counter)
         if counter < num_words_for_round
             if get_text(english_label) == correct_english_transliteration
-                points += length(correct_english_transliteration) / √tok()
+                time_elapsed = tok()
+                points += time_elapsed < 0.75 ? 10 : (length(correct_english_transliteration) / √time_elapsed) * (1-tanh(time_elapsed - 10))
                 counter += 1
                 set_text!(point_label, "$counter/$num_words_for_round | $(string(round(points, sigdigits=2)))")
                 set_text!(result, "✓ Correct!")
@@ -226,15 +230,25 @@ main() do app::Application
                 set_text!(result, "× $correct_english_transliteration")
             end
         elseif counter == num_words_for_round
-            println("POINTS: $points")
+            tock()
+            file = open("points.log", "r")
+            lines = readlines(file)
+            close(file)
+            max_points = max(parse.(Float64, lines)...)
+            println(max_points)
+            println(points)
+            println(points > max_points)
+            open("points.log","a") do io
+                print(io,"\n$points")
+            end
             set_text!(result, "◯ Completed!")
 
             set_child!(randomize_button, Label(string("New Round")))
             set_accent_color!(randomize_button, "success", false)
-            points = 0
             counter += 1
 
-            set_text!(tamil_label, "—")
+            set_text!(tamil_label, points > max_points ? "■ New Best Score!" : "—")
+            points = 0
             set_text!(english_label, "")
         elseif counter == num_words_for_round + 1
             counter = 1
