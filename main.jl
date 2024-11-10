@@ -1,9 +1,11 @@
 using Mousetrap
 using TickTock
-include("langs/tamil/data.jl")
 
 include("utils.jl")
-using .Utils: transliterate, generate_random_word, random_word_from_src
+using .Utils: transliterate, generate_random_word, random_word_from_src, current_script, set_script
+
+set_script("tamil")
+include("langs/$(current_script())/data.jl")
 
 # define widget colors
 const WidgetColor = String

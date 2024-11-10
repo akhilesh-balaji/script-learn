@@ -1,5 +1,15 @@
 module Utils
-include("langs/tamil/data.jl")
+CURRENT_SCRIPT = "tamil"
+
+function current_script()
+    return CURRENT_SCRIPT
+end
+
+function set_script(script)
+    global CURRENT_SCRIPT = script
+end
+
+include("langs/$(current_script())/data.jl")
 function transliterate(tamil)
     english = ""
     for char_i_ ∈ 1:length(tamil)
@@ -57,7 +67,7 @@ function generate_random_word()
 end
 
 function random_word_from_src()
-    file = open("langs/tamil/src.txt", "r")
+    file = open("langs/$(current_script())/src.txt", "r")
     lines = readlines(file)
     close(file)
     chosen_word = ""
