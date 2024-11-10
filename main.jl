@@ -1,138 +1,9 @@
 using Mousetrap
 using TickTock
+include("langs/tamil/data.jl")
 
-# TODO: Export these to separate language file
-consonants = Dict(
-    "க" => "ka",
-    "ங" => "~Nga",
-    "ச" => "ca",
-    "ஞ" => "~na",
-    "ட" => "Ta",
-    "ண" => "Na",
-    "த" => "ta",
-    "ந" => "na",
-    "ப" => "pa",
-    "ம" => "ma",
-    "ய" => "ya",
-    "ர" => "ra",
-    "ல" => "la",
-    "வ" => "va",
-    "ழ" => "zha",
-    "ள" => "La",
-    "ற" => "Ra",
-    "ன" => "na",  # ^na
-
-    "ஜ" => "ja",
-    "ஶ" => "Sa",
-    "ஷ" => "S.a",
-    "ஸ" => "sa",
-    "ஹ" => "ha",
-    "க்ஷ" => "kS.a",
-    "ஸ்ரீ" => "SrI",
-    ":" => ":",
-)
-
-vowels = Dict(
-    "்" => "",
-    "ா" => "A",
-    "ி" => "i",
-    "ீ" => "I",
-    "ு" => "u",
-    "ூ" => "U",
-    "ெ" => "e",
-    "ே" => "E",
-    "ை" => "ai",
-    "ொ" => "o",
-    "ோ" => "O",
-    "ௌ" => "au",
-)
-
-vowels_sep = Dict(
-    "அ" => "a",
-    "ஆ" => "A",
-    "இ" => "i",
-    "ஈ" => "I",
-    "உ" => "u",
-    "ஊ" => "U",
-    "எ" => "e",
-    "ஏ" => "E",
-    "ஐ" => "ai",
-    "ஒ" => "o",
-    "ஓ" => "O",
-    "ஔ" => "au",
-    "ஃ" => "::"
-)
-
-
-function transliterate(tamil)
-    english = ""
-    for char_i_ ∈ 1:length(tamil)
-        char_i = nextind(tamil, 0, char_i_)
-        char = string(tamil[char_i])
-        if char ∈ keys(consonants)
-            if char_i_ + 1 <= length(tamil) && string(tamil[nextind(tamil, char_i)]) ∈ keys(vowels)
-                english *= chop(consonants[char])
-            else
-                english *= consonants[char]
-            end
-        elseif char ∈ keys(vowels)
-            english *= vowels[char]
-        elseif char ∈ keys(vowels_sep)
-            english *= vowels_sep[char]
-        else
-            english *= char
-        end
-    end
-    return english
-end
-
-function generate_random_word()
-    len = rand(4:8)
-    string_rand = ""
-    prev_vowel = false
-    for k ∈ 1:len
-        if k == 1
-            begins_with_vowel = rand([true, false])
-            if begins_with_vowel
-                string_rand *= collect(keys(vowels_sep))[rand(1:length(keys(vowels_sep)))]
-                prev_vowel = true
-            else
-                string_rand *= collect(keys(consonants))[rand(1:length(keys(consonants)))]
-                prev_vowel = false
-            end
-        else
-            if prev_vowel == true
-                string_rand *= collect(keys(consonants))[rand(1:length(keys(consonants)))]
-                prev_vowel = false
-            else
-                vowel_now = rand([true, false, false, false, false])
-                if vowel_now
-                    # string_rand = chop(string_rand)
-                    string_rand *= collect(keys(vowels))[rand(1:length(keys(vowels)))]
-                    prev_vowel = true
-                else
-                    string_rand *= collect(keys(consonants))[rand(1:length(keys(consonants)))]
-                    prev_vowel = false
-                end
-            end
-        end
-    end
-    return string_rand
-end
-
-function random_word_from_src()
-    file = open("src.txt", "r")
-    lines = readlines(file)
-    close(file)
-    chosen_word = ""
-    while chosen_word ∈ [" ", "", "-", " - ", ",", ", "]
-        randline = rand(lines)
-        words = split(randline, " ")
-        chosen_word = rand(words)
-    end
-    return string(replace(chosen_word, "," => "", "." => "", "?" => "", " " => ""))
-end
-
+include("utils.jl")
+using .Utils: transliterate, generate_random_word, random_word_from_src
 
 # define widget colors
 const WidgetColor = String
@@ -204,18 +75,17 @@ main() do app::Application
 
     points = 0
     counter = 1
-    num_words_for_round = 2
+    num_words_for_round = 10
 
-    point_label = Label("$counter/$num_words_for_round | $(string(round(points, sigdigits=2)))")  # TODO: Add score record system
+    point_label = Label("$counter/$num_words_for_round | $(string(round(points, sigdigits=2)))")
     add_css_class!(point_label, "mono")
     tick()
 
     function submit_transliteration()
-        println(counter)
         if counter < num_words_for_round
             if get_text(english_label) == correct_english_transliteration
                 time_elapsed = tok()
-                points += time_elapsed < 0.75 ? 10 : (length(correct_english_transliteration) / √time_elapsed) * (1-tanh(time_elapsed - 10))
+                points += time_elapsed < 0.75 ? 50 : (length(correct_english_transliteration) / √time_elapsed) * (1-tanh(time_elapsed - 10))
                 counter += 1
                 set_text!(point_label, "$counter/$num_words_for_round | $(string(round(points, sigdigits=2)))")
                 set_text!(result, "✓ Correct!")
@@ -227,6 +97,8 @@ main() do app::Application
                 set_text!(tamil_label, string(rand_word_to_show))
                 tick()
             else
+                points -= 3
+                set_text!(point_label, "$counter/$num_words_for_round | $(string(round(points, sigdigits=2)))")
                 set_text!(result, "× $correct_english_transliteration")
             end
         elseif counter == num_words_for_round
