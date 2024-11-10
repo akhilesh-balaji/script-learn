@@ -46,7 +46,7 @@ function set_accent_color!(widget::Widget, color, opaque = true)
 end
 
 add_css!("""
-.mono, .tamiltext, .accent, .success {
+.mono, .scripttext, .accent, .success {
     font-size: 1.5em;
 }
 .mono {
@@ -63,8 +63,8 @@ main() do app::Application
     rand_word_to_show = random_word_from_src()
     correct_english_transliteration = string(transliterate(rand_word_to_show))
 
-    tamil_label = Label(string(rand_word_to_show))
-    add_css_class!(tamil_label, "tamiltext")
+    script_label = Label(string(rand_word_to_show))
+    add_css_class!(script_label, "scripttext")
 
     english_label = Entry()
     add_css_class!(english_label, "mono")
@@ -96,7 +96,7 @@ main() do app::Application
                 set_text!(english_label, "")
                 rand_word_to_show = random_word_from_src()
                 correct_english_transliteration = string(transliterate(rand_word_to_show))
-                set_text!(tamil_label, string(rand_word_to_show))
+                set_text!(script_label, string(rand_word_to_show))
                 tick()
             else
                 points -= 3
@@ -121,7 +121,7 @@ main() do app::Application
             set_accent_color!(randomize_button, "success", false)
             counter += 1
 
-            set_text!(tamil_label, points > max_points ? "■ New Best Score!" : "—")
+            set_text!(script_label, points > max_points ? "■ New Best Score!" : "—")
             points = 0
             set_text!(english_label, "")
         elseif counter == num_words_for_round + 1
@@ -136,7 +136,7 @@ main() do app::Application
 
             rand_word_to_show = random_word_from_src()
             correct_english_transliteration = string(transliterate(rand_word_to_show))
-            set_text!(tamil_label, string(rand_word_to_show))
+            set_text!(script_label, string(rand_word_to_show))
             tick()
         end
     end
@@ -156,7 +156,7 @@ main() do app::Application
         end
     end
 
-    box = vbox(point_label, tamil_label, english_label, randomize_button, result)
+    box = vbox(point_label, script_label, english_label, randomize_button, result)
     set_spacing!(box, 10)
     set_margin_horizontal!(box, 75)
     set_margin_vertical!(box, 40)
