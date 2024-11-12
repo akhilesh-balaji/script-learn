@@ -105,14 +105,14 @@ main() do app::Application
             end
         elseif counter == num_words_for_round
             tock()
-            file = open("points.log", "r")
+            file = open("langs/$(current_script())/points.log", "r")
             lines = readlines(file)
             close(file)
             max_points = max(parse.(Float64, lines)...)
             println(max_points)
             println(points)
             println(points > max_points)
-            open("points.log","a") do io
+            open("langs/$(current_script())/points.log","a") do io
                 print(io,"\n$points")
             end
             set_text!(result, "◯ Completed!")
