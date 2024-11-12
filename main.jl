@@ -4,7 +4,7 @@ using TickTock
 include("utils.jl")
 using .Utils: transliterate, generate_random_word, random_word_from_src, current_script, set_script
 
-set_script("roman")
+set_script("tamil")
 include("langs/$(current_script())/data.jl")
 
 # define widget colors
@@ -161,8 +161,10 @@ main() do app::Application
     actions = [Action("change.script.$i", app) do x
         set_script(scripts[i])
         set_child!(view, Label(uppercasefirst("$(current_script())")))
-        counter = num_words_for_round + 1
-        submit_transliteration()
+        if counter != num_words_for_round + 1
+            counter = num_words_for_round + 1
+            submit_transliteration()
+        end
     end for i in 1:3]
 
     end_action = Action("end.round", app) do x
