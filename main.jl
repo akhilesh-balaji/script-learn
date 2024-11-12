@@ -173,15 +173,12 @@ main() do app::Application
     end
 
     root = MenuModel()
-    for scr ∈ scripts
-        add_action!(root, uppercasefirst(scr), actions[findfirst(item -> item == scr, scripts)])
+    for script ∈ scripts
+        add_action!(root, uppercasefirst(script), actions[findfirst(item -> item == script, scripts)])
     end
     add_action!(root, "END ROUND", end_action)
     view = PopoverButton(PopoverMenu(root))
     set_child!(view, Label(uppercasefirst("$(current_script())")))
-    start_button = Button()
-    set_child!(start_button, Label("→ Start"))
-    set_accent_color!(start_button, "accent", true)
 
     box = vbox(view, point_label, script_label, english_label, randomize_button, result)
     set_spacing!(box, 10)
