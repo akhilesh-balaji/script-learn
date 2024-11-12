@@ -4,7 +4,7 @@ using TickTock
 include("utils.jl")
 using .Utils: transliterate, generate_random_word, random_word_from_src, current_script, set_script
 
-set_script("tamil")
+set_script("roman")
 include("langs/$(current_script())/data.jl")
 
 # define widget colors
@@ -126,6 +126,7 @@ main() do app::Application
             set_text!(english_label, "")
         elseif counter == num_words_for_round + 1
             counter = 1
+            points = 0
             set_text!(point_label, "$counter/$num_words_for_round | $(string(round(points, sigdigits=2)))")
 
             set_child!(randomize_button, Label(string("Verify")))
@@ -156,7 +157,31 @@ main() do app::Application
         end
     end
 
-    box = vbox(point_label, script_label, english_label, randomize_button, result)
+    scripts = readdir("langs")
+    actions = [Action("change.script.$i", app) do x
+        set_script(scripts[i])
+        set_child!(view, Label(uppercasefirst("$(current_script())")))
+        counter = num_words_for_round + 1
+        submit_transliteration()
+    end for i in 1:3]
+
+    end_action = Action("end.round", app) do x
+        counter = num_words_for_round
+        submit_transliteration()
+    end
+
+    root = MenuModel()
+    for scr ∈ scripts
+        add_action!(root, uppercasefirst(scr), actions[findfirst(item -> item == scr, scripts)])
+    end
+    add_action!(root, "END ROUND", end_action)
+    view = PopoverButton(PopoverMenu(root))
+    set_child!(view, Label(uppercasefirst("$(current_script())")))
+    start_button = Button()
+    set_child!(start_button, Label("→ Start"))
+    set_accent_color!(start_button, "accent", true)
+
+    box = vbox(view, point_label, script_label, english_label, randomize_button, result)
     set_spacing!(box, 10)
     set_margin_horizontal!(box, 75)
     set_margin_vertical!(box, 40)
