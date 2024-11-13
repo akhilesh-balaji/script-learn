@@ -183,7 +183,9 @@ main() do app::Application
     add_css_class!(timer, "mono")
     top_box = hbox(view, timer)
     set_tick_callback!(window) do clock::FrameClock
-        set_text!(timer, "$(round(peektimer(), sigdigits=4))")
+        if counter < num_words_for_round
+            set_text!(timer, "$(round(peektimer(), sigdigits=4))")
+        end
         return TICK_CALLBACK_RESULT_CONTINUE
     end
 
