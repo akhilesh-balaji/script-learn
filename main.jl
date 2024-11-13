@@ -179,8 +179,17 @@ main() do app::Application
     add_action!(root, "END ROUND", end_action)
     view = PopoverButton(PopoverMenu(root))
     set_child!(view, Label(uppercasefirst("$(current_script())")))
+    timer = Label("$(round(peektimer(), sigdigits=4))")
+    add_css_class!(timer, "mono")
+    top_box = hbox(view, timer)
+    set_tick_callback!(window) do clock::FrameClock
+        set_text!(timer, "$(round(peektimer(), sigdigits=4))")
+        return TICK_CALLBACK_RESULT_CONTINUE
+    end
 
-    box = vbox(view, point_label, script_label, english_label, randomize_button, result)
+    set_spacing!(top_box, 10)
+
+    box = vbox(top_box, point_label, script_label, english_label, randomize_button, result)
     set_spacing!(box, 10)
     set_margin_horizontal!(box, 75)
     set_margin_vertical!(box, 40)
