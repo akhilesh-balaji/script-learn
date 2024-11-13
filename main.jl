@@ -188,6 +188,7 @@ main() do app::Application
     end
 
     set_spacing!(top_box, 10)
+    set_horizontal_alignment!(top_box, ALIGNMENT_CENTER)
 
     box = vbox(top_box, point_label, script_label, english_label, randomize_button, result)
     set_spacing!(box, 10)
