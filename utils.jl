@@ -33,7 +33,7 @@ function transliterate(original)
         elseif char ∈ keys(vowels_sep)
             english *= vowels_sep[char]
         else
-            english *= "?"
+            english *= char
         end
     end
     return english
@@ -83,6 +83,6 @@ function random_word_from_src()
         words = split(randline, " ")
         chosen_word = rand(words)
     end
-    return string(replace(chosen_word, "," => "", "." => "", "?" => "", " " => ""))
+    return string(replace(chosen_word, "," => "", "." => "", "?" => "", " " => "", "'" => "", "\"" => ""))
 end
 end
