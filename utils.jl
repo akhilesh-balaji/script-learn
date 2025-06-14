@@ -10,15 +10,20 @@ function set_script(script)
     include("langs/$(current_script())/data.jl")
 end
 
+function get_window_title()
+    include("langs/$(current_script())/data.jl")
+    return title
+end
+
 include("langs/$(current_script())/data.jl")
 
-function transliterate(tamil)
+function transliterate(original)
     english = ""
-    for char_i_ ∈ 1:length(tamil)
-        char_i = nextind(tamil, 0, char_i_)
-        char = string(tamil[char_i])
+    for char_i_ ∈ 1:length(original)
+        char_i = nextind(original, 0, char_i_)
+        char = string(original[char_i])
         if char ∈ keys(consonants)
-            if char_i_ + 1 <= length(tamil) && string(tamil[nextind(tamil, char_i)]) ∈ keys(vowels)
+            if char_i_ + 1 <= length(original) && string(original[nextind(original, char_i)]) ∈ keys(vowels)
                 english *= chop(consonants[char])
             else
                 english *= consonants[char]
@@ -28,7 +33,7 @@ function transliterate(tamil)
         elseif char ∈ keys(vowels_sep)
             english *= vowels_sep[char]
         else
-            english *= char
+            english *= "?"
         end
     end
     return english

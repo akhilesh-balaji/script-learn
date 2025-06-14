@@ -1,8 +1,9 @@
 using Mousetrap
 using TickTock
+using Printf
 
 include("utils.jl")
-using .Utils: transliterate, generate_random_word, random_word_from_src, current_script, set_script
+using .Utils: transliterate, generate_random_word, random_word_from_src, current_script, set_script, get_window_title
 
 set_script("tamil")
 include("langs/$(current_script())/data.jl")
@@ -49,6 +50,9 @@ add_css!("""
 .mono, .scripttext, .accent, .success {
     font-size: 1.5em;
 }
+.scripttext, .headerbar_vary * {
+    font-family: Nirmala UI
+}
 .mono {
     font-family: monospace;
 }
@@ -57,7 +61,8 @@ add_css!("""
 main() do app::Application
     window = Window(app)
     header_bar = get_header_bar(window)
-    set_title_widget!(header_bar, Label("(ஃ) தமிழ் எழுத்து முறை"))
+    set_title_widget!(header_bar, Label(get_window_title()))
+    add_css_class!(header_bar, "headerbar_vary")
     set_layout!(header_bar, ":minimize,close")
 
     rand_word_to_show = random_word_from_src()
@@ -74,16 +79,22 @@ main() do app::Application
     set_accent_color!(randomize_button, "accent", true)
 
     result = Label("")
+    add_css_class!(result, "result_scrpt")
 
     points = 0
     counter = 1
-    num_words_for_round = 10
+    num_words_for_round = 3
 
     point_label = Label("$counter/$num_words_for_round | $(string(round(points, sigdigits=2)))")
     add_css_class!(point_label, "mono")
+
     tick()
+    act_tick = false
 
     function submit_transliteration()
+        if counter == 1
+            act_tick = false
+        end
         if counter < num_words_for_round
             if get_text(english_label) == correct_english_transliteration
                 time_elapsed = tok()
@@ -126,6 +137,7 @@ main() do app::Application
             set_text!(english_label, "")
         elseif counter == num_words_for_round + 1
             counter = 1
+            global act_tick = false
             points = 0
             set_text!(point_label, "$counter/$num_words_for_round | $(string(round(points, sigdigits=2)))")
 
@@ -155,17 +167,23 @@ main() do app::Application
             set_text!(english_label, string(chop(get_text(english_label))))
             submit_transliteration()
         end
+        if counter == 1 && length(get_text(english_label)) == 1
+            act_tick = true
+            tick()
+        end
     end
 
     scripts = readdir("langs")
     actions = [Action("change.script.$i", app) do x
         set_script(scripts[i])
         set_child!(view, Label(uppercasefirst("$(current_script())")))
+        act_tick = false
+        set_title_widget!(header_bar, Label(get_window_title()))
         if counter != num_words_for_round + 1
             counter = num_words_for_round + 1
             submit_transliteration()
         end
-    end for i in 1:3]
+    end for i in 1:length(scripts)]
 
     end_action = Action("end.round", app) do x
         counter = num_words_for_round
@@ -183,8 +201,8 @@ main() do app::Application
     add_css_class!(timer, "mono")
     top_box = hbox(view, timer)
     set_tick_callback!(window) do clock::FrameClock
-        if counter < num_words_for_round
-            set_text!(timer, "$(round(peektimer(), sigdigits=4))")
+        if counter <= num_words_for_round
+            set_text!(timer, "$(@sprintf("%0.3f", act_tick == false ? 0 : peektimer()))")
         end
         return TICK_CALLBACK_RESULT_CONTINUE
     end
