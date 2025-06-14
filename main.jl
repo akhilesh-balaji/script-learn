@@ -3,10 +3,13 @@ using TickTock
 using Printf
 
 include("utils.jl")
-using .Utils: transliterate, generate_random_word, random_word_from_src, current_script, set_script, get_window_title
+using .Utils: transliterate, generate_random_word, random_word_from_src, current_script, set_script, get_window_title, get_difficulty, set_difficulty
 
 set_script("tamil")
 include("langs/$(current_script())/data.jl")
+
+set_difficulty(3)
+num_words_for_round = 10
 
 # define widget colors
 const WidgetColor = String
@@ -83,7 +86,7 @@ main() do app::Application
 
     points = 0
     counter = 1
-    num_words_for_round = 3
+    global num_words_for_round
 
     point_label = Label("$counter/$num_words_for_round | $(string(round(points, sigdigits=2)))")
     add_css_class!(point_label, "mono")
@@ -119,7 +122,7 @@ main() do app::Application
             file = open("langs/$(current_script())/points.log", "r")
             lines = readlines(file)
             close(file)
-            max_points = max(parse.(Float64, lines)...)
+            max_points = try max(parse.(Float64, lines)...) catch; 0 end
             println(max_points)
             println(points)
             println(points > max_points)
