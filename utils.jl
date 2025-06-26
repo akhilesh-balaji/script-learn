@@ -1,6 +1,8 @@
 module Utils
 CURRENT_SCRIPT = "tamil"
 DIFFICULTY = 3 # 0 1 2 3
+@enum MODE practice=1 learning=2
+CURRENT_MODE = :practice
 
 function current_script()
     return CURRENT_SCRIPT
@@ -22,6 +24,14 @@ end
 
 function set_difficulty(n)
     global DIFFICULTY = n
+end
+
+function get_mode()
+    return CURRENT_MODE
+end
+
+function set_mode()
+    global CURRENT_MODE = (CURRENT_MODE == :practice) ? :learning : :practice
 end
 
 include("langs/$(current_script())/data.jl")
@@ -87,16 +97,72 @@ function random_word_from_src()
     close(file)
     chosen_word = ""
     println(get_difficulty())
-    while chosen_word ∈ [" ", "", "-", " - ", ",", ", "] || (get_difficulty() == 0 ? false : (get_difficulty() == 1 ? length(chosen_word) >= 5 : get_difficulty == 2 ? length(chosen_word) >= 10 : false))
+    while chosen_word ∈ [" ", "", "-", " - ", ",", ", "] || (get_difficulty() == 0 ? false : (get_difficulty() == 1 ? false : get_difficulty == 2 ? length(chosen_word) >= 5 : false))
         randline = rand(lines)
         words = split(randline, " ")
         chosen_word = rand(words)
     end
     chosen_word = string(replace(chosen_word, "," => "", "." => "", "?" => "", " " => "", "'" => "", "\"" => ""))
     if get_difficulty() == 0
+        return string(generate_random_word(1))
+        # return string(rand(chosen_word))
+    end
+    if get_difficulty() == 1
         return string(generate_random_word(2))
         # return string(rand(chosen_word))
     end
     return chosen_word
 end
+
+function next_learning_word()
+    file = open("langs/$(current_script())/learning_progress.log", "r")
+    lines = readlines(file)
+    close(file)
+    current_stage = 1
+    stage_name = "vow"
+    vowels_sep_length = length(vowels_sep)
+    vowels_length = length(vowels)
+    consonants_length = length(consonants)
+    chosen_word = ""
+    if lines == []
+        stage_name = learning_path[floor(Int, current_stage-0.1)]
+        println("$stage_name !!")
+        open("langs/$(current_script())/learning_progress.log","a") do io
+            print(io,"\n1")
+        end
+    else
+        current_stage = parse(Int,lines[length(lines)])
+        try
+            stage_name = learning_path[floor(Int, current_stage-0.1)]
+        catch
+            set_mode()
+            return "practice"
+        end
+    end
+    if stage_name == "vow"
+        if current_stage < 1.5
+            chosen_word = collect(keys(vowels_sep))[rand(1:floor(Int, length(keys(vowels_sep))/2))]
+        elseif 1.5 <= current_stage < 2
+            chosen_word = collect(keys(vowels_sep))[rand(1:length(keys(vowels_sep)))]
+        end
+    elseif stage_name == "cons"
+        if 2 <= current_stage < 2.25
+            chosen_word = collect(keys(consonants))[rand(1:floor(Int, length(keys(consonants))/4))]
+        elseif 2.25 <= current_stage < 2.5
+            chosen_word = collect(keys(consonants))[rand(1:floor(Int, length(keys(consonants))/2))]
+        elseif 2.5 <= current_stage < 2.75
+            chosen_word = collect(keys(consonants))[rand(1:floor(Int, 3*length(keys(consonants))/4))]
+        else
+            chosen_word = collect(keys(consonants))[rand(1:length(keys(consonants)))]
+        end
+    elseif stage_name == "vow+cons"
+        chosen_word = collect(keys(consonants))[rand(1:length(keys(consonants)))]
+        chosen_word *= collect(keys(vowels))[rand(1:length(keys(vowels)))]
+    elseif stage_name == "cons+cons"
+        chosen_word = collect(keys(consonants))[rand(1:length(keys(consonants)))]
+        chosen_word *= [s for (s,v) in vowels if v == ""][1]
+        chosen_word *= collect(keys(consonants))[rand(1:length(keys(consonants)))]
+    end
+    return chosen_word
+    end
 end

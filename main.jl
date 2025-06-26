@@ -3,10 +3,12 @@ using TickTock
 using Printf
 
 include("utils.jl")
-using .Utils: transliterate, generate_random_word, random_word_from_src, current_script, set_script, get_window_title, get_difficulty, set_difficulty
+using .Utils: transliterate, generate_random_word, random_word_from_src, next_learning_word, current_script, set_script, get_window_title, get_difficulty, set_difficulty, get_mode, set_mode, MODE
 
 set_script("tamil")
 include("langs/$(current_script())/data.jl")
+
+# set_mode()
 
 set_difficulty(3)
 num_words_for_round = 10
@@ -56,8 +58,16 @@ add_css!("""
 .scripttext, .headerbar_vary * {
     font-family: Nirmala UI
 }
+.modetxt {
+    font-style: italic
+}
 .mono {
     font-family: monospace;
+}
+.togglebutton {
+    transform: scale(1.3,1);
+    margin-left: 2px;
+    margin-right: 2px;
 }
 """)
 
@@ -68,7 +78,7 @@ main() do app::Application
     add_css_class!(header_bar, "headerbar_vary")
     set_layout!(header_bar, ":minimize,close")
 
-    rand_word_to_show = random_word_from_src()
+    rand_word_to_show = get_mode() == :practice ? random_word_from_src() : next_learning_word()
     correct_english_transliteration = string(transliterate(rand_word_to_show))
 
     script_label = Label(string(rand_word_to_show))
@@ -83,6 +93,30 @@ main() do app::Application
 
     result = Label("")
     add_css_class!(result, "result_scrpt")
+
+    learning_or_practice = Label(string(get_mode()))
+    add_css_class!(learning_or_practice, "modetxt")
+
+    # Learning mode
+    prev_level = Button()
+    set_is_circular!(prev_level, true)
+    set_child!(prev_level, Label("◀"))
+    add_css_class!(prev_level, "mono")
+    next_level = Button()
+    set_is_circular!(next_level, true)
+    set_child!(next_level, Label("▶"))
+    add_css_class!(next_level, "mono")
+    toggler = Switch()
+    set_is_active!(toggler, false)
+    add_css_class!(toggler, "togglebutton")
+    learning_box = CenterBox(ORIENTATION_HORIZONTAL, prev_level, toggler, next_level)
+
+    # Practice mode
+    difficulty_scale = Scale(0.0, 3.0, 1.0)
+    set_orientation!(difficulty_scale, ORIENTATION_HORIZONTAL)
+    set_value!(difficulty_scale, 1)
+    set_should_draw_value!(difficulty_scale, true)
+    set_size_request!(difficulty_scale, Vector2f(200, 0))
 
     points = 0
     counter = 1
@@ -108,7 +142,8 @@ main() do app::Application
 
                 set_text!(result, "")
                 set_text!(english_label, "")
-                rand_word_to_show = random_word_from_src()
+                # rand_word_to_show = random_word_from_src()
+                rand_word_to_show = get_mode() == :practice ? random_word_from_src() : next_learning_word()
                 correct_english_transliteration = string(transliterate(rand_word_to_show))
                 set_text!(script_label, string(rand_word_to_show))
                 tick()
@@ -150,7 +185,8 @@ main() do app::Application
             set_text!(result, "")
             set_text!(english_label, "")
 
-            rand_word_to_show = random_word_from_src()
+            # rand_word_to_show = random_word_from_src()
+            rand_word_to_show = get_mode() == :practice ? random_word_from_src() : next_learning_word()
             correct_english_transliteration = string(transliterate(rand_word_to_show))
             set_text!(script_label, string(rand_word_to_show))
             tick()
@@ -213,7 +249,7 @@ main() do app::Application
     set_spacing!(top_box, 10)
     set_horizontal_alignment!(top_box, ALIGNMENT_CENTER)
 
-    box = vbox(top_box, point_label, script_label, english_label, randomize_button, result)
+    box = vbox(top_box, point_label, script_label, english_label, randomize_button, result, learning_or_practice, learning_box, difficulty_scale)
     set_spacing!(box, 10)
     set_margin_horizontal!(box, 75)
     set_margin_vertical!(box, 40)

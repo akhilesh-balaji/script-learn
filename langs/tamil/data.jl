@@ -59,4 +59,6 @@ vowels_sep = Dict(
     "ஃ" => "::"
 )
 
+learning_path = ["vow", "cons", "vow+cons"]
+
 title = "(ஃ) தமிழ் எழுத்து முறை"
