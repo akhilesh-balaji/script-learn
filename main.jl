@@ -56,10 +56,10 @@ add_css!("""
     font-size: 1.5em;
 }
 .scripttext, .headerbar_vary * {
-    font-family: Nirmala UI
+    font-family: Nirmala UI;
 }
 .modetxt {
-    font-style: italic
+    font-style: italic;
 }
 .mono {
     font-family: monospace;
@@ -68,6 +68,9 @@ add_css!("""
     transform: scale(1.3,1);
     margin-left: 2px;
     margin-right: 2px;
+}
+.invisible {
+    opacity: 0;
 }
 """)
 
@@ -109,14 +112,19 @@ main() do app::Application
     toggler = Switch()
     set_is_active!(toggler, false)
     add_css_class!(toggler, "togglebutton")
-    learning_box = CenterBox(ORIENTATION_HORIZONTAL, prev_level, toggler, next_level)
+    learning_box = hbox(prev_level, toggler, next_level)
+    if get_mode() == :practice
+        add_css_class!(learning_box, "invisible")
+    end
 
     # Practice mode
-    difficulty_scale = Scale(0.0, 3.0, 1.0)
-    set_orientation!(difficulty_scale, ORIENTATION_HORIZONTAL)
-    set_value!(difficulty_scale, 1)
+    difficulty_scale = Scale(0.0, 0.3, 0.1, ORIENTATION_HORIZONTAL)
+    set_value!(difficulty_scale, 0)
     set_should_draw_value!(difficulty_scale, true)
     set_size_request!(difficulty_scale, Vector2f(200, 0))
+    if get_mode() == :learning
+        add_css_class!(difficulty_scale, "invisible")
+    end
 
     points = 0
     counter = 1
@@ -228,6 +236,12 @@ main() do app::Application
         counter = num_words_for_round
         submit_transliteration()
     end
+
+    connect_signal_value_changed!(difficulty_scale) do self::Scale
+        set_difficulty(floor(Int, get_value(self) * 10))
+        activate!(actions[findall(sc -> sc == current_script(), scripts)[1]])
+    end
+
 
     root = MenuModel()
     for script ∈ scripts

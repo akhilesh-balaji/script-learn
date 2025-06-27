@@ -80,4 +80,6 @@ vowels_sep = Dict(
     "अँ" => "am.",
 )
 
+learning_path = ["vow", "cons", "vow+cons", "cons+cons"]
+
 title = "(ꣷ) देवनागरी लिपि"

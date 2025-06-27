@@ -80,4 +80,6 @@ vowels_sep = Dict(
     "అఁ" => "am.",
 )
 
+learning_path = ["vow", "cons", "vow+cons", "cons+cons"]
+
 title = "(౷) తెలుగు లిపి"

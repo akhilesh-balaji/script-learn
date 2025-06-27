@@ -60,4 +60,6 @@ vowels_sep = Dict(
     "ے" => "E"
 )
 
+learning_path = ["vow", "cons", "vow+cons", "cons+cons"]
+
 title = "اُردُو حُرُوفِ تَہَجِّی‌ (﷽)"

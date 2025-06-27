@@ -40,4 +40,6 @@ vowels_sep = Dict(
     "я" => "ya", "Я" => "ya"
 )
 
+learning_path = ["vow", "cons"]
+
 title = "(Ѯ) ру́сский алфави́т"

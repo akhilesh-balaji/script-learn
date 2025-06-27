@@ -65,4 +65,6 @@ vowels_sep = Dict(
     "ῲ" => "O", "ῷ" => "O"
 )
 
+learning_path = ["vow", "cons"]
+
 title = "(Ϙ) ελληνικό αλφάβητο"

@@ -78,4 +78,6 @@ vowels_sep = Dict(
     "অঃ" => "o:",
 )
 
+learning_path = ["vow", "cons", "vow+cons", "cons+cons"]
+
 title = "(ঋ) বাংলা লিপি"
