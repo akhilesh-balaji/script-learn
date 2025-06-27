@@ -52,7 +52,7 @@ function transliterate(original)
         elseif char ∈ keys(vowels_sep)
             english *= vowels_sep[char]
         else
-            english *= char
+            english *= "-"
         end
     end
     return english
@@ -114,6 +114,18 @@ function random_word_from_src()
     return chosen_word
 end
 
+function get_learning_path_length()
+    return length(learning_path)
+end
+
+function get_current_learning_stage()
+    file = open("langs/$(current_script())/learning_progress.log", "r")
+    lines = readlines(file)
+    close(file)
+    current_stage = parse(Float64, lines[length(lines)])
+    return current_stage
+end
+
 function next_learning_word()
     file = open("langs/$(current_script())/learning_progress.log", "r")
     lines = readlines(file)
@@ -131,14 +143,15 @@ function next_learning_word()
             print(io,"\n1")
         end
     else
-        current_stage = parse(Int,lines[length(lines)])
+        current_stage = parse(Float64, lines[length(lines)])
         try
             stage_name = learning_path[floor(Int, current_stage-0.1)]
         catch
-            set_mode()
-            return "practice"
+            current_stage = 1
+            stage_name = learning_path[current_stage]
         end
     end
+    println(stage_name)
     if stage_name == "vow"
         if current_stage < 1.5
             chosen_word = collect(keys(vowels_sep))[rand(1:floor(Int, length(keys(vowels_sep))/2))]

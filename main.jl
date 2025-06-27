@@ -3,76 +3,17 @@ using TickTock
 using Printf
 
 include("utils.jl")
-using .Utils: transliterate, generate_random_word, random_word_from_src, next_learning_word, current_script, set_script, get_window_title, get_difficulty, set_difficulty, get_mode, set_mode, MODE
+using .Utils: transliterate, generate_random_word, random_word_from_src, next_learning_word, current_script, set_script, get_window_title, get_difficulty, set_difficulty, get_mode, set_mode, get_learning_path_length, get_current_learning_stage, MODE
 
 set_script("tamil")
 include("langs/$(current_script())/data.jl")
 
 # set_mode()
 
-set_difficulty(3)
+set_difficulty(0)
 num_words_for_round = 10
 
-# define widget colors
-const WidgetColor = String
-const WIDGET_COLOR_DEFAULT = "default"
-const WIDGET_COLOR_ACCENT = "accent"
-const WIDGET_COLOR_SUCCESS = "success"
-const WIDGET_COLOR_WARNING = "warning"
-const WIDGET_COLOR_ERROR = "error"
-
-# create CSS classes for all of the widget colors
-for name ∈ [WIDGET_COLOR_DEFAULT, WIDGET_COLOR_ACCENT, WIDGET_COLOR_SUCCESS, WIDGET_COLOR_WARNING, WIDGET_COLOR_ERROR]
-    # compile CSS and append it to the global CSS style provider state
-    add_css!("""
-    $name:not(.opaque) {
-        background-color: @$(name)_fg_color;
-    }
-    .$name.opaque {
-        background-color: @$(name)_bg_color;
-        color: @$(name)_fg_color;
-    }
-    """)
-end
-
-# function to set the accent color of a widget
-function set_accent_color!(widget::Widget, color, opaque = true)
-    if !(color ∈ [WIDGET_COLOR_DEFAULT, WIDGET_COLOR_ACCENT, WIDGET_COLOR_SUCCESS, WIDGET_COLOR_WARNING, WIDGET_COLOR_ERROR])
-        log_critical("In set_color!: Color ID `" * color * "` is not supported")
-    end
-    for color_type ∈ [WIDGET_COLOR_DEFAULT, WIDGET_COLOR_ACCENT, WIDGET_COLOR_SUCCESS, WIDGET_COLOR_WARNING, WIDGET_COLOR_ERROR]
-        remove_css_class!(widget, color_type)
-    end
-    add_css_class!(widget, color)
-    if opaque
-        add_css_class!(widget, "opaque")
-    else
-        remove_css_class!(widget, "opaque")
-    end
-end
-
-add_css!("""
-.mono, .scripttext, .accent, .success {
-    font-size: 1.5em;
-}
-.scripttext, .headerbar_vary * {
-    font-family: Nirmala UI;
-}
-.modetxt {
-    font-style: italic;
-}
-.mono {
-    font-family: monospace;
-}
-.togglebutton {
-    transform: scale(1.3,1);
-    margin-left: 2px;
-    margin-right: 2px;
-}
-.invisible {
-    opacity: 0;
-}
-""")
+include("styles.jl")
 
 main() do app::Application
     window = Window(app)
@@ -97,7 +38,7 @@ main() do app::Application
     result = Label("")
     add_css_class!(result, "result_scrpt")
 
-    learning_or_practice = Label(string(get_mode()))
+    learning_or_practice = Label("$(string(get_mode()))$(get_mode() == :learning ? " L($(get_current_learning_stage()))" : "")")
     add_css_class!(learning_or_practice, "modetxt")
 
     # Learning mode
@@ -113,8 +54,11 @@ main() do app::Application
     set_is_active!(toggler, false)
     add_css_class!(toggler, "togglebutton")
     learning_box = hbox(prev_level, toggler, next_level)
+    set_spacing!(learning_box, 10)
+    set_horizontal_alignment!(learning_box, ALIGNMENT_CENTER)
     if get_mode() == :practice
-        add_css_class!(learning_box, "invisible")
+        add_css_class!(next_level, "invisible")
+        add_css_class!(prev_level, "invisible")
     end
 
     # Practice mode
@@ -169,8 +113,10 @@ main() do app::Application
             println(max_points)
             println(points)
             println(points > max_points)
-            open("langs/$(current_script())/points.log","a") do io
-                print(io,"\n$points")
+            if get_mode() == :practice
+                open("langs/$(current_script())/points.log","a") do io
+                    print(io,"\n$points")
+                end
             end
             set_text!(result, "◯ Completed!")
 
@@ -178,7 +124,7 @@ main() do app::Application
             set_accent_color!(randomize_button, "success", false)
             counter += 1
 
-            set_text!(script_label, points > max_points ? "■ New Best Score!" : "—")
+            set_text!(script_label, points > max_points ? "■ New Best Score!" : (get_mode() == :practice ? "—" : "Learning; no scores saved"))
             points = 0
             set_text!(english_label, "")
         elseif counter == num_words_for_round + 1
@@ -242,6 +188,60 @@ main() do app::Application
         activate!(actions[findall(sc -> sc == current_script(), scripts)[1]])
     end
 
+    connect_signal_switched!(toggler) do self::Switch
+        set_mode()
+        if get_mode() == :practice
+            add_css_class!(next_level, "invisible")
+            add_css_class!(prev_level, "invisible")
+            remove_css_class!(difficulty_scale, "invisible")
+        end
+        if get_mode() == :learning
+            add_css_class!(difficulty_scale, "invisible")
+            remove_css_class!(next_level, "invisible")
+            remove_css_class!(prev_level, "invisible")
+        end
+        set_text!(learning_or_practice, string(get_mode()))
+        if get_mode() == :learning
+            set_text!(learning_or_practice, "$(string(get_mode())) (L$(get_current_learning_stage()))")
+        end
+        activate!(actions[findall(sc -> sc == current_script(), scripts)[1]])
+    end
+
+    connect_signal_clicked!(prev_level) do self::Button
+        current_stage = get_current_learning_stage()
+        open("langs/$(current_script())/learning_progress.log","a") do io
+            if current_stage == 1
+                print(io, "\n1")
+            else
+                if 1 < current_stage <= 2
+                    print(io, "\n$(current_stage-0.5)")
+                elseif 2 < current_stage <= 3
+                    print(io, "\n$(current_stage-0.25)")
+                elseif 3 < current_stage <= 5
+                    print(io, "\n$(current_stage-1)")
+                end
+            end
+        end
+        set_text!(learning_or_practice, "$(string(get_mode())) (L$(get_current_learning_stage()))")
+    end
+
+    connect_signal_clicked!(next_level) do self::Button
+        current_stage = get_current_learning_stage()
+        open("langs/$(current_script())/learning_progress.log","a") do io
+            if current_stage == get_learning_path_length() + 0.5
+                print(io, "")
+            else
+                if 1 <= current_stage < 2
+                    print(io, "\n$(current_stage+0.5)")
+                elseif 2 <= current_stage < 3
+                    print(io, "\n$(current_stage+0.25)")
+                elseif 3 <= current_stage <= get_learning_path_length()
+                    print(io, "\n$(current_stage+1)")
+                end
+            end
+        end
+        set_text!(learning_or_practice, "$(string(get_mode())) (L$(get_current_learning_stage()))")
+    end
 
     root = MenuModel()
     for script ∈ scripts
