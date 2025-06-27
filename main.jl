@@ -124,7 +124,7 @@ main() do app::Application
             set_accent_color!(randomize_button, "success", false)
             counter += 1
 
-            set_text!(script_label, points > max_points ? "■ New Best Score!" : (get_mode() == :practice ? "—" : "Learning; no scores saved"))
+            set_text!(script_label, get_mode() == :practice ? (points > max_points ? "■ New Best Score!" : "—") : "Learning; no scores saved"))
             points = 0
             set_text!(english_label, "")
         elseif counter == num_words_for_round + 1
