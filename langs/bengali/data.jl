@@ -1,4 +1,4 @@
-consonants = Dict(
+consonants = OrderedDict(
     "ক" => "ko",
     "খ" => "kho",
     "গ" => "go",
@@ -37,7 +37,7 @@ consonants = Dict(
     "হ" => "ho",
 )
 
-vowels = Dict(
+vowels = OrderedDict(
     "া" => "A",
     "ি" => "i",
     "ী" => "I",
@@ -58,7 +58,7 @@ vowels = Dict(
     "ঁ" => "m.",
 )
 
-vowels_sep = Dict(
+vowels_sep = OrderedDict(
     "অ" => "o",
     "আ" => "A",
     "ই" => "i",

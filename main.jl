@@ -1,6 +1,7 @@
 using Mousetrap
 using TickTock
 using Printf
+using DataStructures
 
 include("utils.jl")
 using .Utils: transliterate, generate_random_word, random_word_from_src, next_learning_word, current_script, set_script, get_window_title, get_difficulty, set_difficulty, get_mode, set_mode, get_learning_path_length, get_current_learning_stage, MODE

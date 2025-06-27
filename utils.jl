@@ -1,4 +1,5 @@
 module Utils
+using DataStructures
 CURRENT_SCRIPT = "tamil"
 DIFFICULTY = 3 # 0 1 2 3
 @enum MODE practice=1 learning=2
@@ -138,7 +139,6 @@ function next_learning_word()
     chosen_word = ""
     if lines == []
         stage_name = learning_path[floor(Int, current_stage-0.1)]
-        println("$stage_name !!")
         open("langs/$(current_script())/learning_progress.log","a") do io
             print(io,"\n1")
         end
@@ -151,15 +151,15 @@ function next_learning_word()
             stage_name = learning_path[current_stage]
         end
     end
-    println(stage_name)
     if stage_name == "vow"
-        if current_stage < 1.5
+        if current_stage <= 1.5
             chosen_word = collect(keys(vowels_sep))[rand(1:floor(Int, length(keys(vowels_sep))/2))]
-        elseif 1.5 <= current_stage < 2
+        elseif 1.5 < current_stage <= 2
             chosen_word = collect(keys(vowels_sep))[rand(1:length(keys(vowels_sep)))]
         end
     elseif stage_name == "cons"
         if 2 <= current_stage < 2.25
+            println("yes!!")
             chosen_word = collect(keys(consonants))[rand(1:floor(Int, length(keys(consonants))/4))]
         elseif 2.25 <= current_stage < 2.5
             chosen_word = collect(keys(consonants))[rand(1:floor(Int, length(keys(consonants))/2))]

@@ -1,4 +1,4 @@
-consonants = Dict(
+consonants = OrderedDict(
     "б" => "b", "Б" => "b",
     "в" => "v", "В" => "v",
     "г" => "g", "Г" => "g",
@@ -24,10 +24,10 @@ consonants = Dict(
     "ь" => "", "Ь" => ""
 )
 
-vowels = Dict(
+vowels = OrderedDict(
 )
 
-vowels_sep = Dict(
+vowels_sep = OrderedDict(
     "а" => "a", "А" => "a",
     "е" => "e", "Е" => "e",
     "ё" => "e", "Ё" => "e",

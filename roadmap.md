@@ -13,3 +13,4 @@
 - [ ] Extremely hard mode: paragraph transliteration
 - [ ] Fine a way to compile to binary/web
 - [ ] Extend to CJK scripts
+- [ ] Make learning steps depend on vowels/consonants/etc. dict length

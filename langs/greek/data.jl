@@ -1,4 +1,4 @@
-consonants = Dict(
+consonants = OrderedDict(
     "β" => "b",
     "Β" => "b",
     "γ" => "g",
@@ -36,10 +36,10 @@ consonants = Dict(
     "Ψ" => "ps",
 )
 
-vowels = Dict(
+vowels = OrderedDict(
 )
 
-vowels_sep = Dict(
+vowels_sep = OrderedDict(
     "α" => "a", "Α" => "a", "ά" => "a", "Ά" => "a",
     "ὰ" => "a", "ᾶ" => "a", "ἀ" => "a", "ἁ" => "a", "ἄ" => "a", "ἅ" => "a",
     "ἂ" => "a", "ἃ" => "a", "ἆ" => "a", "ἇ" => "a", "ᾳ" => "a", "ᾴ" => "a",

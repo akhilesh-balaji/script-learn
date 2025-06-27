@@ -1,4 +1,4 @@
-consonants = Dict(
+consonants = OrderedDict(
     "ب" => "ba",
     "پ" => "pha",
     "ت" => "ta",
@@ -39,7 +39,7 @@ consonants = Dict(
     "ے" => "e"
 )
 
-vowels = Dict(
+vowels = OrderedDict(
     "َ" => "a",    # zabar
     "ِ" => "i",    # zer
     "ُ" => "u",    # pesh
@@ -50,7 +50,7 @@ vowels = Dict(
     "ّ" => "",     # shadda (handled elsewhere)
 )
 
-vowels_sep = Dict(
+vowels_sep = OrderedDict(
     "ا" => "a",
     "آ" => "A",
     "ؤ" => "^O",   # consistent with your mapping of "ॉ" => "^O"
