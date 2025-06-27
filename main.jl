@@ -37,6 +37,7 @@ main() do app::Application
     randomize_button = Button()
     set_child!(randomize_button, Label(string("Verify")))
     set_accent_color!(randomize_button, "accent", true)
+    add_css_class!(randomize_button, "mono")
 
     result = Label("")
     add_css_class!(result, "result_scrpt")
