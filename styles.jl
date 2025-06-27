@@ -40,6 +40,13 @@ add_css!("""
 .mono, .scripttext, .accent, .success {
     font-size: 1.5em;
 }
+.scripttextw {
+    font-size: 1.5em;
+    font-family: serif;
+    font-style: italic;
+    margin-bottom: -35px;
+    color: #9C90C5;
+}
 .scripttext, .headerbar_vary * {
     font-family: Nirmala UI;
 }

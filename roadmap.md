@@ -1,7 +1,7 @@
 # Roadmap
 
 - [x] Introduce more languages
-- [ ] Introduce state-machine like approach & include more screens
+- [x] Introduce more screens
 - [x] Add difficulty levels beginning with single letters
 - [ ] Add option to import languages
 - [ ] Add sound effects

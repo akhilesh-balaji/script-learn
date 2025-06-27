@@ -1,8 +1,8 @@
 # Skṛpṭ Learn
 
-### A way to familiarize oneself with new scripts and writing systems.
+### A way to familiarize oneself with new phonetic scripts and writing systems.
 
-![icon_banner.png](icon_banner.png)
+![./assets/icon_banner.png](./assets/icon_banner.png)
 
 ## Features
 

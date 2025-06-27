@@ -19,9 +19,11 @@ include("styles.jl")
 main() do app::Application
     window = Window(app)
     header_bar = get_header_bar(window)
-    set_title_widget!(header_bar, Label(get_window_title()))
+    set_title_widget!(header_bar, Label("(ꙮ) Skṛpṭ Learn"))
     add_css_class!(header_bar, "headerbar_vary")
     set_layout!(header_bar, ":minimize,close")
+
+    stack = Mousetrap.Stack()
 
     rand_word_to_show = get_mode() == :practice ? random_word_from_src() : next_learning_word()
     correct_english_transliteration = string(transliterate(rand_word_to_show))
@@ -269,7 +271,39 @@ main() do app::Application
     set_margin_horizontal!(box, 75)
     set_margin_vertical!(box, 40)
 
-    set_child!(window, box)
+    practice_screen = add_child!(stack, box, "Practice/Learn")
+
+    welcome_label = Label("wϵℓcome.")
+    add_css_class!(welcome_label, "scripttextw")
+    icon_display = ImageDisplay("./assets/icon_text.png")
+    set_scale!(icon_display, 200)
+
+    begin_button = Button()
+    set_child!(begin_button, Label(string("Start Learning")))
+    set_accent_color!(begin_button, "accent", false)
+    add_css_class!(begin_button, "mono")
+    settings_button = Button()
+    set_is_circular!(settings_button, true)
+    set_child!(settings_button, Label("⚙"))
+    begin_buttons = hbox(begin_button, settings_button)
+    set_spacing!(begin_buttons, 5)
+    set_horizontal_alignment!(begin_buttons, ALIGNMENT_CENTER)
+
+    connect_signal_clicked!(begin_button) do self::Button
+        set_visible_child!(stack, practice_screen)
+        set_title_widget!(header_bar, Label(get_window_title()))
+    end
+
+    welcome_screen_box = vbox(welcome_label, icon_display, begin_buttons)
+    set_spacing!(welcome_screen_box, 0)
+    set_margin_horizontal!(welcome_screen_box, 75)
+    set_margin_vertical!(welcome_screen_box, 40)
+
+    welcome_screen = add_child!(stack, welcome_screen_box, "Welcome")
+
+    set_child!(window, stack)
+
+    set_visible_child!(stack, welcome_screen)
 
     set_current_theme!(app, THEME_DEFAULT_DARK)
     present!(window)
