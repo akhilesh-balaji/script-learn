@@ -288,6 +288,7 @@ main() do app::Application
     add_css_class!(welcome_label, "scripttextw")
     icon_display = ImageDisplay("./assets/icon_text.png")
     set_scale!(icon_display, 200)
+    add_css_class!(icon_display, "thelogo")
 
     begin_button = Button()
     set_child!(begin_button, Label(string("Start Learning")))
@@ -300,7 +301,15 @@ main() do app::Application
     set_spacing!(begin_buttons, 5)
     set_horizontal_alignment!(begin_buttons, ALIGNMENT_CENTER)
 
-    welcome_screen_box = vbox(welcome_label, icon_display, begin_buttons)
+    writeup = Label("ɐ weɪ tə fəmɪliəɹaɪz wɒnsɛlf wɪð njuː fənɛtɪk skɹɪpts and ɹaɪtɪŋ sɪstəmz wɛn lɜːnɪŋ ɐ njuː skɹɪpt.\n\n<i>juːs ðə lɜːnɪŋ məʊd and juːs ðɪ aɹəʊz tʊ ɪŋkɹiːs ɔː diːkɹiːs ðɪ ɪlɑːnɪŋ. wɛn juː hav bɪkʌm fəmɪliə wɪð ɔːl lɛtəz, swɪtʃ tə ðə pɹaktɪs məʊd and ɡɹadʒuːəli ɪŋkɹiːs ðə dɪfɪkʌlti ʌntɪl juː kan ɹiːd fluːəntli.</i> ~Made by Akhilesh Balaji.")
+
+    set_justify_mode!(writeup, JUSTIFY_MODE_FILL)
+    set_wrap_mode!(writeup, LABEL_WRAP_MODE_WORD_OR_CHAR)
+    add_css_class!(writeup, "thewriteup")
+    width_clamp_frame = ClampFrame(200, ORIENTATION_HORIZONTAL)
+    set_child!(width_clamp_frame, writeup)
+
+    welcome_screen_box = vbox(welcome_label, icon_display, begin_buttons, width_clamp_frame)
     set_spacing!(welcome_screen_box, 0)
     set_margin_horizontal!(welcome_screen_box, 75)
     set_margin_vertical!(welcome_screen_box, 40)

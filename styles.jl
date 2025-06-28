@@ -47,6 +47,9 @@ add_css!("""
     margin-bottom: -35px;
     color: #9C90C5;
 }
+.thelogo {
+    margin-bottom: -25px;
+}
 .scripttext, .headerbar_vary * {
     font-family: Nirmala UI;
 }
@@ -63,5 +66,8 @@ add_css!("""
 }
 .invisible {
     opacity: 0;
+}
+.thewriteup {
+    margin-top: 10px;
 }
 """)
