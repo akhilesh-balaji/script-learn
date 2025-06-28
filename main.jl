@@ -19,7 +19,8 @@ include("styles.jl")
 main() do app::Application
     window = Window(app)
     header_bar = get_header_bar(window)
-    set_title_widget!(header_bar, Label("(ꙮ) Skṛpṭ Learn"))
+    default_title = "(ꙮ) Skṛpṭ Learn"
+    set_title_widget!(header_bar, Label(default_title))
     add_css_class!(header_bar, "headerbar_vary")
     set_layout!(header_bar, ":minimize,close")
 
@@ -74,6 +75,11 @@ main() do app::Application
         add_css_class!(difficulty_scale, "invisible")
     end
 
+    return_home_button = Button()
+    set_child!(return_home_button, Label("Back to Home"))
+    add_css_class!(return_home_button, "mono")
+    add_css_class!(return_home_button, "invisible_")
+
     points = 0
     counter = 1
     global num_words_for_round
@@ -85,6 +91,7 @@ main() do app::Application
     act_tick = false
 
     function submit_transliteration()
+        add_css_class!(return_home_button, "invisible_")
         if counter == 1
             act_tick = false
         end
@@ -130,8 +137,10 @@ main() do app::Application
 
             set_text!(script_label, get_mode() == :practice ? (points > max_points ? "■ New Best Score!" : "—") : "Learning; no scores saved")
             points = 0
+            remove_css_class!(return_home_button, "invisible_")
             set_text!(english_label, "")
         elseif counter == num_words_for_round + 1
+            add_css_class!(return_home_button, "invisible_")
             counter = 1
             global act_tick = false
             points = 0
@@ -267,13 +276,14 @@ main() do app::Application
     set_spacing!(top_box, 10)
     set_horizontal_alignment!(top_box, ALIGNMENT_CENTER)
 
-    box = vbox(top_box, point_label, script_label, english_label, randomize_button, result, learning_or_practice, learning_box, difficulty_scale)
+    box = vbox(top_box, point_label, script_label, english_label, randomize_button, result, learning_or_practice, learning_box, difficulty_scale, return_home_button)
     set_spacing!(box, 10)
     set_margin_horizontal!(box, 75)
     set_margin_vertical!(box, 40)
 
     practice_screen = add_child!(stack, box, "Practice/Learn")
 
+    # Welcome screen
     welcome_label = Label("wϵℓcome.")
     add_css_class!(welcome_label, "scripttextw")
     icon_display = ImageDisplay("./assets/icon_text.png")
@@ -285,15 +295,10 @@ main() do app::Application
     add_css_class!(begin_button, "mono")
     settings_button = Button()
     set_is_circular!(settings_button, true)
-    set_child!(settings_button, Label("⚙"))
+    set_child!(settings_button, Label("🛠"))
     begin_buttons = hbox(begin_button, settings_button)
     set_spacing!(begin_buttons, 5)
     set_horizontal_alignment!(begin_buttons, ALIGNMENT_CENTER)
-
-    connect_signal_clicked!(begin_button) do self::Button
-        set_visible_child!(stack, practice_screen)
-        set_title_widget!(header_bar, Label(get_window_title()))
-    end
 
     welcome_screen_box = vbox(welcome_label, icon_display, begin_buttons)
     set_spacing!(welcome_screen_box, 0)
@@ -301,6 +306,58 @@ main() do app::Application
     set_margin_vertical!(welcome_screen_box, 40)
 
     welcome_screen = add_child!(stack, welcome_screen_box, "Welcome")
+
+    # Settings screen
+    no_words = SpinButton(0, 50, 1)
+    set_value!(no_words, num_words_for_round)
+
+    connect_signal_value_changed!(no_words) do self::SpinButton
+        num_words_for_round = get_value(self)
+        return nothing
+    end
+
+    settings_return_home_button = Button()
+    set_child!(settings_return_home_button, Label("Back to Home"))
+    add_css_class!(settings_return_home_button, "mono")
+
+    dark_toggler = Switch()
+    set_is_active!(dark_toggler, true)
+    connect_signal_switched!(dark_toggler) do self::Switch
+        set_current_theme!(app, get_is_active(self) == true ? THEME_DEFAULT_DARK : THEME_DEFAULT_LIGHT)
+        if !get_is_active(self)
+            create_from_image!(icon_display, Image("./assets/icon_text_light.png"))
+        else
+            create_from_image!(icon_display, Image("./assets/icon_text.png"))
+        end
+    end
+    color_mode = hbox(Label("Dark mode?"), dark_toggler)
+    set_spacing!(color_mode, 10)
+    set_horizontal_alignment!(color_mode, ALIGNMENT_CENTER)
+
+    settings_screen_box = vbox(no_words, color_mode, settings_return_home_button)
+    set_spacing!(settings_screen_box, 10)
+    set_margin_horizontal!(settings_screen_box, 75)
+    set_margin_vertical!(settings_screen_box, 40)
+
+    settings_screen = add_child!(stack, settings_screen_box, "Settings")
+
+    connect_signal_clicked!(settings_button) do self::Button
+        set_visible_child!(stack, settings_screen)
+    end
+
+    function back_to_home_screen(self::Button)
+        activate!(actions[findall(sc -> sc == current_script(), scripts)[1]])
+        set_visible_child!(stack, welcome_screen)
+        set_title_widget!(header_bar, Label(default_title))
+    end
+
+    connect_signal_clicked!(back_to_home_screen, return_home_button)
+    connect_signal_clicked!(back_to_home_screen, settings_return_home_button)
+
+    connect_signal_clicked!(begin_button) do self::Button
+        set_visible_child!(stack, practice_screen)
+        set_title_widget!(header_bar, Label(get_window_title()))
+    end
 
     set_child!(window, stack)
 
