@@ -45,9 +45,11 @@ add_css!("""
     font-family: serif;
     font-style: italic;
     margin-bottom: -35px;
+    padding-left: 7px;
     color: #9C90C5;
 }
 .thelogo {
+    margin-top: -10px;
     margin-bottom: -25px;
 }
 .scripttext, .headerbar_vary * {

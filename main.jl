@@ -285,6 +285,8 @@ main() do app::Application
 
     # Welcome screen
     welcome_label = Label("wϵℓcome.")
+    set_justify_mode!(welcome_label, JUSTIFY_MODE_LEFT)
+    set_horizontal_alignment!(welcome_label, ALIGNMENT_START)
     add_css_class!(welcome_label, "scripttextw")
     icon_display = ImageDisplay("./assets/icon_text.png")
     set_scale!(icon_display, 200)
