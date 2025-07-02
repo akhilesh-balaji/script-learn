@@ -129,7 +129,7 @@ main() do app::Application
                 correct_english_transliteration = string(transliterate(rand_word_to_show))
                 set_text!(script_label, string(rand_word_to_show))
 
-                @async !nospeak && speak_word(rand_word_to_show)
+                !nospeak && speak_word(rand_word_to_show)
 
                 tick()
             else
@@ -178,7 +178,7 @@ main() do app::Application
             rand_word_to_show = get_mode() == :practice ? random_word_from_src() : next_learning_word()
             correct_english_transliteration = string(transliterate(rand_word_to_show))
             set_text!(script_label, string(rand_word_to_show))
-            @async !nospeak && speak_word(rand_word_to_show)
+            !nospeak && speak_word(rand_word_to_show)
             tick()
         end
     end
@@ -386,6 +386,7 @@ main() do app::Application
     set_is_active!(audio_toggler, false)
     connect_signal_switched!(audio_toggler) do self::Switch
         speak_mode = get_is_active(self)
+        println(speak_mode)
         return nothing
     end
     speak_mode = hbox(Label("Speak words?"), audio_toggler)
@@ -415,7 +416,7 @@ main() do app::Application
     connect_signal_clicked!(back_to_home_screen, settings_return_home_button)
 
     connect_signal_clicked!(begin_button) do self::Button
-        @async speak_word(rand_word_to_show)
+        speak_word(rand_word_to_show)
         set_visible_child!(stack, practice_screen)
         set_title_widget!(header_bar, Label(get_window_title()))
         return nothing
