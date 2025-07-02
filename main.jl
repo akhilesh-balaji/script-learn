@@ -104,7 +104,7 @@ main() do app::Application
             tts.save("audio.mp3")
 
             @async ffplay() do exe
-                run(`$exe audio.mp3 -nodisp -autoexit`)
+                run(`$exe audio.mp3 -nodisp -autoexit -loglevel quiet`)
             end
         end
     end
