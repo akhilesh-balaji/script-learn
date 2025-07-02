@@ -1,7 +1,11 @@
 using Mousetrap
 using TickTock
 using Printf
+using PyCall
+using FFplay_jll
 using DataStructures
+
+gtts = pyimport("gtts")
 
 include("utils.jl")
 using .Utils: transliterate, generate_random_word, random_word_from_src, next_learning_word, current_script, set_script, get_window_title, get_difficulty, set_difficulty, get_mode, set_mode, get_learning_path_length, get_current_learning_stage, MODE
@@ -25,6 +29,7 @@ main() do app::Application
     set_layout!(header_bar, ":minimize,close")
 
     stack = Mousetrap.Stack()
+    set_transition_duration!(stack, seconds(1));
 
     rand_word_to_show = get_mode() == :practice ? random_word_from_src() : next_learning_word()
     correct_english_transliteration = string(transliterate(rand_word_to_show))
@@ -89,8 +94,22 @@ main() do app::Application
 
     tick()
     act_tick = false
+    speak_mode = false
 
-    function submit_transliteration()
+    function speak_word(input_word)
+        if speak_mode
+            lang_map = gtts.lang.tts_langs()
+            shorthand = current_script() == "devanagiri" ? "hi" : [s for (s,v) in lang_map if v == uppercasefirst(current_script())][1]
+            tts = gtts.gTTS(input_word; lang=shorthand)
+            tts.save("audio.mp3")
+
+            @async ffplay() do exe
+                run(`$exe audio.mp3 -nodisp -autoexit`)
+            end
+        end
+    end
+
+    function submit_transliteration(nospeak = false)
         add_css_class!(return_home_button, "invisible_")
         if counter == 1
             act_tick = false
@@ -109,6 +128,9 @@ main() do app::Application
                 rand_word_to_show = get_mode() == :practice ? random_word_from_src() : next_learning_word()
                 correct_english_transliteration = string(transliterate(rand_word_to_show))
                 set_text!(script_label, string(rand_word_to_show))
+
+                @async !nospeak && speak_word(rand_word_to_show)
+
                 tick()
             else
                 points -= 3
@@ -156,16 +178,19 @@ main() do app::Application
             rand_word_to_show = get_mode() == :practice ? random_word_from_src() : next_learning_word()
             correct_english_transliteration = string(transliterate(rand_word_to_show))
             set_text!(script_label, string(rand_word_to_show))
+            @async !nospeak && speak_word(rand_word_to_show)
             tick()
         end
     end
 
     connect_signal_clicked!(randomize_button) do self::Button
         submit_transliteration()
+        return nothing
     end
 
     connect_signal_activate!(english_label) do self::Entry
         submit_transliteration()
+        return nothing
     end
 
     connect_signal_text_changed!(english_label) do self::Entry
@@ -177,28 +202,36 @@ main() do app::Application
             act_tick = true
             tick()
         end
+        return nothing
     end
+
+    diff_changed = false
 
     scripts = readdir("langs")
     actions = [Action("change.script.$i", app) do x
+        same_scr = (current_script() == scripts[i]) && !diff_changed
         set_script(scripts[i])
         set_child!(view, Label(uppercasefirst("$(current_script())")))
         act_tick = false
         set_title_widget!(header_bar, Label(get_window_title()))
         if counter != num_words_for_round + 1
             counter = num_words_for_round + 1
-            submit_transliteration()
-        end
+            submit_transliteration(same_scr)
+        end; return nothing
     end for i in 1:length(scripts)]
 
     end_action = Action("end.round", app) do x
         counter = num_words_for_round
         submit_transliteration()
+        return nothing
     end
 
     connect_signal_value_changed!(difficulty_scale) do self::Scale
         set_difficulty(floor(Int, get_value(self) * 10))
+        diff_changed = true
         activate!(actions[findall(sc -> sc == current_script(), scripts)[1]])
+        diff_changed = false
+        return nothing
     end
 
     connect_signal_switched!(toggler) do self::Switch
@@ -218,6 +251,7 @@ main() do app::Application
             set_text!(learning_or_practice, "$(string(get_mode())) (L$(get_current_learning_stage()))")
         end
         activate!(actions[findall(sc -> sc == current_script(), scripts)[1]])
+        return nothing
     end
 
     connect_signal_clicked!(prev_level) do self::Button
@@ -236,6 +270,7 @@ main() do app::Application
             end
         end
         set_text!(learning_or_practice, "$(string(get_mode())) (L$(get_current_learning_stage()))")
+        return nothing
     end
 
     connect_signal_clicked!(next_level) do self::Button
@@ -254,6 +289,7 @@ main() do app::Application
             end
         end
         set_text!(learning_or_practice, "$(string(get_mode())) (L$(get_current_learning_stage()))")
+        return nothing
     end
 
     root = MenuModel()
@@ -340,12 +376,23 @@ main() do app::Application
         else
             create_from_image!(icon_display, Image("./assets/icon_text.png"))
         end
+        return nothing
     end
     color_mode = hbox(Label("Dark mode?"), dark_toggler)
     set_spacing!(color_mode, 10)
     set_horizontal_alignment!(color_mode, ALIGNMENT_CENTER)
 
-    settings_screen_box = vbox(no_words, color_mode, settings_return_home_button)
+    audio_toggler = Switch()
+    set_is_active!(audio_toggler, false)
+    connect_signal_switched!(audio_toggler) do self::Switch
+        speak_mode = get_is_active(self)
+        return nothing
+    end
+    speak_mode = hbox(Label("Speak words?"), audio_toggler)
+    set_spacing!(speak_mode, 10)
+    set_horizontal_alignment!(speak_mode, ALIGNMENT_CENTER)
+
+    settings_screen_box = vbox(no_words, color_mode, speak_mode, settings_return_home_button)
     set_spacing!(settings_screen_box, 10)
     set_margin_horizontal!(settings_screen_box, 75)
     set_margin_vertical!(settings_screen_box, 40)
@@ -354,20 +401,24 @@ main() do app::Application
 
     connect_signal_clicked!(settings_button) do self::Button
         set_visible_child!(stack, settings_screen)
+        return nothing
     end
 
     function back_to_home_screen(self::Button)
         activate!(actions[findall(sc -> sc == current_script(), scripts)[1]])
         set_visible_child!(stack, welcome_screen)
         set_title_widget!(header_bar, Label(default_title))
+        return nothing
     end
 
     connect_signal_clicked!(back_to_home_screen, return_home_button)
     connect_signal_clicked!(back_to_home_screen, settings_return_home_button)
 
     connect_signal_clicked!(begin_button) do self::Button
+        @async speak_word(rand_word_to_show)
         set_visible_child!(stack, practice_screen)
         set_title_widget!(header_bar, Label(get_window_title()))
+        return nothing
     end
 
     set_child!(window, stack)
