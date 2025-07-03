@@ -115,7 +115,10 @@ main() do app::Application
             act_tick = false
         end
         if counter < num_words_for_round
-            if get_text(english_label) == correct_english_transliteration
+            correctness_threshold_text = get_text(english_label)
+            correctness_threshold_text = replace(correctness_threshold_text, "aa" => "A")
+            correctness_threshold_text = replace(correctness_threshold_text, "ee" => "I")
+            if correctness_threshold_text == correct_english_transliteration
                 time_elapsed = tok()
                 points += time_elapsed < 0.75 ? 50 : (length(correct_english_transliteration) / √time_elapsed) * (1-tanh(time_elapsed - 10))
                 counter += 1
