@@ -19,7 +19,7 @@
 - Russian (alphabet)
 - Tamil (abugida)
 - Telugu (abugida)
-- _Urdu (alphabet) (review)_
+- Urdu (alphabet)
 
 Please open a PR to contribute a new script.
 
