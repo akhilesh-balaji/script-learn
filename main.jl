@@ -1,3 +1,5 @@
+ENV["GSK_RENDERER"] = "cairo"  # <-- prevents GPU rendering crash
+
 using Mousetrap
 using TickTock
 using Printf

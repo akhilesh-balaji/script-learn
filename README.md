@@ -26,3 +26,5 @@ Please open a PR to contribute a new script.
 ## Roadmap
 
 See [`roadmap.md`](./roadmap.md).
+
+Releases will be available soon.
