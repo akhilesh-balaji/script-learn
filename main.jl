@@ -120,6 +120,7 @@ main() do app::Application
             correctness_threshold_text = get_text(english_label)
             correctness_threshold_text = replace(correctness_threshold_text, "aa" => "A")
             correctness_threshold_text = replace(correctness_threshold_text, "ee" => "I")
+            correctness_threshold_text = replace(correctness_threshold_text, "oo" => "U")
             if correctness_threshold_text == correct_english_transliteration
                 time_elapsed = tok()
                 points += time_elapsed < 0.75 ? 50 : (length(correct_english_transliteration) / √time_elapsed) * (1-tanh(time_elapsed - 10))
