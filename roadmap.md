@@ -11,6 +11,6 @@
 - [ ] Include handwritten prompts, etc. extracted from sources for each script
 - [ ] Mixed script support
 - [ ] Extremely hard mode: paragraph transliteration
-- [ ] Fine a way to compile to binary/web
-- [ ] Extend to CJK scripts
+- [ ] Fine a way to compile to binary/web (https://discourse.julialang.org/t/timestables-jl-a-fun-app-using-qml-jl-and-packagecompiler-jl/46799)
+- [ ] Extend to CJK scripts (include https://en.wikipedia.org/wiki/Inuktitut_syllabics)
 - [ ] Make learning steps depend on vowels/consonants/etc. dict length
