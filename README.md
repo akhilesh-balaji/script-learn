@@ -28,3 +28,5 @@ Please open a PR to contribute a new script.
 See [`roadmap.md`](./roadmap.md).
 
 Releases will be available soon.
+
+Launch in browser: `xpra start --start='xterm nethack' :10 --bind-tcp=0.0.0.0:10000 --html=on --auth=none --no-daemon`

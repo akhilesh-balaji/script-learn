@@ -18,7 +18,7 @@ include("langs/$(current_script())/data.jl")
 # set_mode()
 
 set_difficulty(0)
-num_words_for_round = 10
+num_words_for_round = 3
 
 include("styles.jl")
 
@@ -68,7 +68,7 @@ main() do app::Application
     learning_box = hbox(prev_level, toggler, next_level)
     set_spacing!(learning_box, 10)
     set_horizontal_alignment!(learning_box, ALIGNMENT_CENTER)
-    if get_mode() == :practice
+        if get_mode() == :practice
         add_css_class!(next_level, "invisible")
         add_css_class!(prev_level, "invisible")
     end
@@ -78,7 +78,7 @@ main() do app::Application
     set_value!(difficulty_scale, 0)
     set_should_draw_value!(difficulty_scale, true)
     set_size_request!(difficulty_scale, Vector2f(200, 0))
-    if get_mode() == :learning
+        if get_mode() == :learning
         add_css_class!(difficulty_scale, "invisible")
     end
 
@@ -101,7 +101,7 @@ main() do app::Application
     function speak_word(input_word)
         if speak_mode
             lang_map = gtts.lang.tts_langs()
-            shorthand = current_script() == "devanagiri" ? "hi" : [s for (s,v) in lang_map if v == uppercasefirst(current_script())][1]
+            shorthand = current_script() == "devanagiri" ? "hi" : [s for (s, v) in lang_map if v == uppercasefirst(current_script())][1]
             tts = gtts.gTTS(input_word; lang=shorthand)
             tts.save("audio.mp3")
 
@@ -111,11 +111,12 @@ main() do app::Application
         end
     end
 
-    function submit_transliteration(nospeak = false)
+    function submit_transliteration(nospeak=false)
         add_css_class!(return_home_button, "invisible_")
         if counter == 1
             act_tick = false
         end
+
         if counter < num_words_for_round
             correctness_threshold_text = get_text(english_label)
             correctness_threshold_text = replace(correctness_threshold_text, "aa" => "A")
@@ -123,7 +124,7 @@ main() do app::Application
             correctness_threshold_text = replace(correctness_threshold_text, "oo" => "U")
             if correctness_threshold_text == correct_english_transliteration
                 time_elapsed = tok()
-                points += time_elapsed < 0.75 ? 50 : (length(correct_english_transliteration) / √time_elapsed) * (1-tanh(time_elapsed - 10))
+                points += time_elapsed < 0.75 ? 50 : (length(correct_english_transliteration) / √time_elapsed) * (1 - tanh(time_elapsed - 10))
                 counter += 1
                 set_text!(point_label, "$counter/$num_words_for_round | $(string(round(points, sigdigits=2)))")
                 set_text!(result, "✓ Correct!")
@@ -153,8 +154,8 @@ main() do app::Application
             println(points)
             println(points > max_points)
             if get_mode() == :practice
-                open("langs/$(current_script())/points.log","a") do io
-                    print(io,"\n$points")
+                open("langs/$(current_script())/points.log", "a") do io
+                    print(io, "\n$points")
                 end
             end
             set_text!(result, "◯ Completed!")
@@ -262,16 +263,16 @@ main() do app::Application
 
     connect_signal_clicked!(prev_level) do self::Button
         current_stage = get_current_learning_stage()
-        open("langs/$(current_script())/learning_progress.log","a") do io
+        open("langs/$(current_script())/learning_progress.log", "a") do io
             if current_stage == 1
                 print(io, "\n1")
             else
                 if 1 < current_stage <= 2
-                    print(io, "\n$(current_stage-0.5)")
+                    print(io, "\n$(current_stage - 0.5)")
                 elseif 2 < current_stage <= 3
-                    print(io, "\n$(current_stage-0.25)")
+                    print(io, "\n$(current_stage - 0.25)")
                 elseif 3 < current_stage <= 5
-                    print(io, "\n$(current_stage-1)")
+                    print(io, "\n$(current_stage - 1)")
                 end
             end
         end
@@ -281,16 +282,16 @@ main() do app::Application
 
     connect_signal_clicked!(next_level) do self::Button
         current_stage = get_current_learning_stage()
-        open("langs/$(current_script())/learning_progress.log","a") do io
+        open("langs/$(current_script())/learning_progress.log", "a") do io
             if current_stage == get_learning_path_length() + 0.5
                 print(io, "")
             else
                 if 1 <= current_stage < 2
-                    print(io, "\n$(current_stage+0.5)")
+                    print(io, "\n$(current_stage + 0.5)")
                 elseif 2 <= current_stage < 3
-                    print(io, "\n$(current_stage+0.25)")
+                    print(io, "\n$(current_stage + 0.25)")
                 elseif 3 <= current_stage <= get_learning_path_length()
-                    print(io, "\n$(current_stage+1)")
+                    print(io, "\n$(current_stage + 1)")
                 end
             end
         end
@@ -340,7 +341,7 @@ main() do app::Application
     add_css_class!(begin_button, "mono")
     settings_button = Button()
     set_is_circular!(settings_button, true)
-    set_child!(settings_button, Label("🛠"))
+    set_child!(settings_button, Label("S"))
     begin_buttons = hbox(begin_button, settings_button)
     set_spacing!(begin_buttons, 5)
     set_horizontal_alignment!(begin_buttons, ALIGNMENT_CENTER)
@@ -358,7 +359,7 @@ main() do app::Application
     set_margin_horizontal!(welcome_screen_box, 75)
     set_margin_vertical!(welcome_screen_box, 40)
 
-    welcome_screen = add_child!(stack, welcome_screen_box, "Welcome")
+        welcome_screen = add_child!(stack, welcome_screen_box, "Welcome")
 
     # Settings screen
     no_words = SpinButton(0, 50, 1)
@@ -395,11 +396,11 @@ main() do app::Application
         println(speak_mode)
         return nothing
     end
-    speak_mode = hbox(Label("Speak words?"), audio_toggler)
-    set_spacing!(speak_mode, 10)
-    set_horizontal_alignment!(speak_mode, ALIGNMENT_CENTER)
+    speak_mode_button = hbox(Label("Speak words?"), audio_toggler)
+    set_spacing!(speak_mode_button, 10)
+    set_horizontal_alignment!(speak_mode_button, ALIGNMENT_CENTER)
 
-    settings_screen_box = vbox(no_words, color_mode, speak_mode, settings_return_home_button)
+    settings_screen_box = vbox(no_words, color_mode, speak_mode_button, settings_return_home_button)
     set_spacing!(settings_screen_box, 10)
     set_margin_horizontal!(settings_screen_box, 75)
     set_margin_vertical!(settings_screen_box, 40)
