@@ -75,7 +75,8 @@ RUN apt-get update && apt-get install -y \
   libjs-jquery-ui \
   gnome-backgrounds || true \
   mate-backgrounds || true 
-RUN apt-get install -y xpra 
+RUN apt-get install -y xpra dbus
+RUN apt-get install dbus-x11
 # RUN apt-get install -y wget && wget https://xpra.org/lts/jammy/main/binary-arm64/xpra-html5-5.6-r14-1.deb && apt-get -y install ./xpra-html5-5.6-r14-1.deb && rm -f xpra-html5-5.6-r14-1.deb 
 
 # Add non-root user
